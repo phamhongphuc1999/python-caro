@@ -1,4 +1,18 @@
-from type import BlockMode, PositionType, SideReturnType
+from type import (
+    DOWN_LEFT,
+    DOWN_RIGHT,
+    DOWN_VERTICAL,
+    EMPTY,
+    LEFT_HORIZONTAL,
+    PLAYER1,
+    RIGHT_HORIZONTAL,
+    UP_LEFT,
+    UP_RIGHT,
+    UP_VERTICAL,
+    BlockMode,
+    PositionType,
+    SideReturnType,
+)
 
 
 class CaroBoard:
@@ -8,8 +22,15 @@ class CaroBoard:
 
     def __init__(self, size=5):
         self.size = size
-        self.current_player = 1
-        self.board = [[0 for _ in range(size)] for _ in range(size)]
+        self.current_player = PLAYER1
+        self.board = [[EMPTY for _ in range(size)] for _ in range(size)]
+
+    def load_board(self, current_player: int, board: list[list[int]]):
+        if len(board) != len(board[0]):
+            raise SyntaxError("size is invalid")
+        self.current_player = current_player
+        self.board = board
+        self.size = len(board)
 
     def _check_direction_win(
         self, position: PositionType, vector: PositionType
@@ -26,73 +47,65 @@ class CaroBoard:
             elif _player != self.current_player:
                 block_mode = "opposite"
                 break
-            else:
-                if (
-                    0 > pointer[0]
-                    or pointer[0] >= self.size
-                    or 0 > pointer[1]
-                    or pointer[1] >= self.size
-                ):
-                    block_mode = "wall"
-                    break
             pointer = [pointer[0] + vector[0], pointer[1] + vector[1]]
-            ++counter
+            counter = counter + 1
+        if (
+            pointer[0] < 0
+            or pointer[0] >= self.size
+            or pointer[1] < 0
+            or pointer[1] >= self.size
+        ):
+            block_mode = "wall"
         return {"counter": counter, "blockMode": block_mode}
 
     def _check_horizontal_win(self, position: PositionType):
-        left_horizontal_win = self._check_direction_win(position, [0, -1])
-        right_horizontal_win = self._check_direction_win(position, [0, 1])
-        total_pieces = left_horizontal_win["counter"] + right_horizontal_win["counter"]
+        left_win = self._check_direction_win(position, LEFT_HORIZONTAL)
+        right_win = self._check_direction_win(position, RIGHT_HORIZONTAL)
+        total_pieces = left_win["counter"] + right_win["counter"]
         is_block_two_side = (
-            left_horizontal_win["blockMode"] == "opposite"
-            and right_horizontal_win["blockMode"] == "opposite"
+            left_win["blockMode"] == "opposite" and right_win["blockMode"] == "opposite"
         )
         return total_pieces >= 4 and (not is_block_two_side)
 
     def _check_vertical_win(self, position: PositionType):
-        top_vertical_win = self._check_direction_win(position, [-1, 0])
-        bottom_vertical_win = self._check_direction_win(position, [1, 0])
-        total_pieces = top_vertical_win["counter"] + bottom_vertical_win["counter"]
+        up_win = self._check_direction_win(position, UP_VERTICAL)
+        down_win = self._check_direction_win(position, DOWN_VERTICAL)
+        total_pieces = up_win["counter"] + down_win["counter"]
         is_block_two_side = (
-            top_vertical_win["blockMode"] == "opposite"
-            and bottom_vertical_win["blockMode"] == "opposite"
+            up_win["blockMode"] == "opposite" and down_win["blockMode"] == "opposite"
         )
         return total_pieces >= 4 and (not is_block_two_side)
 
     def _check_left_diagonal_win(self, position: PositionType):
-        top_left_diagonal_win = self._check_direction_win(position, [-1, -1])
-        bottom_left_diagonal_win = self._check_direction_win(position, [1, 1])
-        total_pieces = (
-            top_left_diagonal_win["counter"] + bottom_left_diagonal_win["counter"]
-        )
+        up_left_win = self._check_direction_win(position, UP_LEFT)
+        down_right_win = self._check_direction_win(position, DOWN_RIGHT)
+        total_pieces = up_left_win["counter"] + down_right_win["counter"]
         is_block_two_side = (
-            top_left_diagonal_win["blockMode"] == "opposite"
-            and bottom_left_diagonal_win["blockMode"] == "opposite"
+            up_left_win["blockMode"] == "opposite"
+            and down_right_win["blockMode"] == "opposite"
         )
         return total_pieces >= 4 and (not is_block_two_side)
 
     def _check_right_diagonal_win(self, position: PositionType):
-        top_right_diagonal_win = self._check_direction_win(position, [-1, 1])
-        bottom_right_diagonal_win = self._check_direction_win(position, [1, -1])
-        total_pieces = (
-            top_right_diagonal_win["counter"] + bottom_right_diagonal_win["counter"]
-        )
+        up_right_win = self._check_direction_win(position, UP_RIGHT)
+        down_left_win = self._check_direction_win(position, DOWN_LEFT)
+        total_pieces = up_right_win["counter"] + down_left_win["counter"]
         is_block_two_side = (
-            top_right_diagonal_win["blockMode"] == "opposite"
-            and bottom_right_diagonal_win["blockMode"] == "opposite"
+            up_right_win["blockMode"] == "opposite"
+            and down_left_win["blockMode"] == "opposite"
         )
         return total_pieces >= 4 and (not is_block_two_side)
 
     def _check_win(self, position: PositionType):
         counter = 0
         if self._check_horizontal_win(position):
-            ++counter
+            counter = counter + 1
         if self._check_vertical_win(position):
-            ++counter
+            counter = counter + 1
         if self._check_left_diagonal_win(position):
-            ++counter
+            counter = counter + 1
         if self._check_right_diagonal_win(position):
-            ++counter
+            counter = counter + 1
         return counter
 
     def _switch_current_player(self):
@@ -118,5 +131,5 @@ class CaroBoard:
         print("***************************")
 
     def reset(self):
-        self.current_player = 0
+        self.current_player = PLAYER1
         self.board = [[0 for _ in range(self.size)] for _ in range(self.size)]

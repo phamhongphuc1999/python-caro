@@ -47,7 +47,8 @@ class CaroUIBoard(QWidget):
 
         if self.board.board[int(row)][int(col)] == 0:
             self.board.board[int(row)][int(col)] = self.board.current_player
-            if self.board.move(int(row), int(col)):
+            if self.board.move([int(row), int(col)]):
+                print("Player ", self.board.current_player, " won!")
                 self.reset_board()
 
         self.update()
