@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtGui import QPainter, QPen
-from PyQt6.QtCore import Qt, QRect
+from PyQt6.QtCore import Qt
 
 from CaroBoard import CaroBoard
 
@@ -14,7 +14,7 @@ class CaroUIBoard(QWidget):
 
         _size = self.board.size * self.cell_size
         self.setFixedSize(_size, _size)
-        self.setWindowTitle("Caro Game - PyQt6")
+        self.setWindowTitle("Caro Game")
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -52,7 +52,6 @@ class CaroUIBoard(QWidget):
                 self.reset_board()
 
         self.update()
-        self.board.draw()
 
     def reset_board(self):
         self.board.reset()
